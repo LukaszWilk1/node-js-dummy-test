@@ -23,9 +23,6 @@ pipeline {
             }
         }
 
-        stage('Logs') {
-        }
-
         stage('Build Image') {
             steps {
                 sh 'docker build -t $BUILD_CONTAINER_IMAGE -f Dockerfile.build .'
