@@ -68,7 +68,17 @@ pipeline {
 
         stage('Smoke Test') {
             steps {
-                sh 'curl http://deploy-container:3000'
+                sh '''
+                    echo "[TEST] Weryfikacja działania aplikacji (smoke test)..."
+                    docker run --rm --network container:deploy-container appropriate/curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 > status.txt
+                    STATUS=$(cat status.txt)
+                    if [ "$STATUS" -ne 200 ]; then
+                    echo "Smoke test failed! App returned status $STATUS"
+                    exit 1
+                    else
+                    echo "Smoke test passed! App responded with 200 OK"
+                    fi
+                '''
             }
         }
     }
