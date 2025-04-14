@@ -3,8 +3,17 @@ pipeline {
     stages {
         stage('Clear') { 
             steps {
-                sh 'docker rm -f $(docker ps -aq)'
-	            sh 'docker rmi -f $(docker images -aq)' 
+                script{
+                    sh '''
+                        rm -rf /path/to/folder/* /path/to/folder/.[!.]*
+
+                        if [ "$(docker ps -aq)" ]; then
+                          docker rm -f $(docker ps -aq)
+                        fi
+                        if [ "$(docker images -aq)" ]; then
+                        fi
+                    '''
+                }
             }
         }
     }
