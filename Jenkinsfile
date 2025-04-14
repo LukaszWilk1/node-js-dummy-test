@@ -68,7 +68,7 @@ pipeline {
 
         stage('Smoke Test') {
             steps {
-                sh 'curl http://localhost:3000'
+                sh 'curl http://deploy-container:3000'
             }
         }
     }
