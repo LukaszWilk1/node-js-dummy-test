@@ -70,7 +70,7 @@ pipeline {
             steps {
                 sh '''
                     echo "[TEST] Weryfikacja działania aplikacji (smoke test)..."
-                    STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+                    STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://deploy-container:3000)
                     if [ "$STATUS" -ne 200 ]; then
                     echo "Smoke test failed! App returned status $STATUS"
                     exit 1
