@@ -83,34 +83,15 @@ pipeline {
             }
         }
 
-        stage('Debug Credentials') {
-            steps {
-                script {
-                    def creds = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
-                        com.cloudbees.plugins.credentials.common.StandardUsernameCredentials.class,
-                        Jenkins.instance,
-                        null,
-                        null
-                    )
-                    echo "Dostępne poświadczenia:"
-                    creds.each {
-                        echo " - ID: ${it.id}, Description: ${it.description}, Username: ${it.username}"
-                    }
-                }
-            }
-        }
-
         stage('Publish Docker Image') {
             steps {
              withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                     sh '''
                         echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
 
-                        # Tagowanie obrazu jako 'latest' i wersjonowany
                         docker tag $DEPLOY_CONTAINER_IMAGE $DOCKERHUB_USER/myapp:latest
                         docker tag $DEPLOY_CONTAINER_IMAGE $DOCKERHUB_USER/myapp:$VERSION
 
-                        # Wysyłka na DockerHub
                         docker push $DOCKERHUB_USER/myapp:latest
                         docker push $DOCKERHUB_USER/myapp:$VERSION
                     '''
