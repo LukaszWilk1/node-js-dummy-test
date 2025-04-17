@@ -5,7 +5,6 @@ pipeline {
         BUILD_CONTAINER_IMAGE = 'myapp-build:latest'
         TEST_CONTAINER_IMAGE = 'myapp-test:latest'
         DEPLOY_CONTAINER_IMAGE = 'myapp-deploy:latest'
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
         VERSION = "1.0.${BUILD_NUMBER}"
     }
 
@@ -85,11 +84,23 @@ pipeline {
         }
 
         stage('Publish Docker Image') {
-            steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS | docker login -u $DOCKERHUB_CREDENTIALS --password-stdin'
-                sh 'docker push elwilk/myapp:$VERSION'
-            }
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+            sh '''
+                echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+
+                # Tagowanie obrazu jako 'latest' i wersjonowany
+                docker tag $DEPLOY_CONTAINER_IMAGE $DOCKERHUB_USER/myapp:latest
+                docker tag $DEPLOY_CONTAINER_IMAGE $DOCKERHUB_USER/myapp:$VERSION
+
+                # Wysyłka na DockerHub
+                docker push $DOCKERHUB_USER/myapp:latest
+                docker push $DOCKERHUB_USER/myapp:$VERSION
+            '''
         }
+    }
+}
+
 
     }
 
