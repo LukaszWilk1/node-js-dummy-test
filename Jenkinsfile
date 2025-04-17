@@ -83,6 +83,18 @@ pipeline {
             }
         }
 
+        stage('Update package.json version') {
+            steps {
+                script {
+                    def newVersion = "1.0.${env.BUILD_NUMBER}"
+                    echo "Ustawiam wersję paczki na ${newVersion}"
+                    sh """
+                    npm version ${newVersion} --no-git-tag-version
+                    """
+                }
+            }
+        }
+
         stage('Publish Docker Image') {
             steps {
              withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
@@ -99,6 +111,20 @@ pipeline {
             }
         }
 
+        stage('Publish to npm') {
+            steps {
+                withCredentials([string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')]) {
+                    sh '''
+                        echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+
+                        npm install
+                        npm publish
+
+                        rm ~/.npmrc
+                    '''
+                }
+            }
+        }
 
     }
 
