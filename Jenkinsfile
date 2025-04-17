@@ -83,16 +83,6 @@ pipeline {
             }
         }
 
-        stage('Update package.json version') {
-            steps {
-                script {
-                    def newVersion = "1.0.${env.BUILD_NUMBER}"
-                    echo "Ustawiam wersję paczki na ${newVersion}"
-                    sh 'docker run --rm -v \$(pwd):/app -w /app node:18 bash -c "npm version ${newVersion} --no-git-tag-version"'
-                }
-            }
-        }
-
         stage('Publish Docker Image') {
             steps {
              withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
@@ -109,20 +99,24 @@ pipeline {
             }
         }
 
-        stage('Publish to npm') {
+        stage('Version & Publish to npm') {
             steps {
                 withCredentials([string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')]) {
-                    sh '''
-                        docker run --rm \
-                            -v $(pwd):/app \
-                            -w /app \
-                            -e NPM_TOKEN=$NPM_TOKEN \
-                            node:18 bash -c '
-                                echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
-                                npm install
-                                npm publish
-                            '
-                    '''
+                    script {
+                        def newVersion = "1.0.${env.BUILD_NUMBER}"
+                        sh """
+                            docker run --rm \
+                                -v \$(pwd):/app \
+                                -w /app \
+                                -e NPM_TOKEN=${env.NPM_TOKEN} \
+                                node:18 bash -c '
+                                    echo "//registry.npmjs.org/:_authToken=\$NPM_TOKEN" > ~/.npmrc
+                                    npm version ${newVersion} --no-git-tag-version
+                                    npm install
+                                    npm publish
+                                '
+                        """
+                    }
                 }
             }
         }
