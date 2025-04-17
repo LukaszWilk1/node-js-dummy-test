@@ -88,9 +88,7 @@ pipeline {
                 script {
                     def newVersion = "1.0.${env.BUILD_NUMBER}"
                     echo "Ustawiam wersję paczki na ${newVersion}"
-                    sh """
-                    npm version ${newVersion} --no-git-tag-version
-                    """
+                    sh 'docker run --rm -v \$(pwd):/app -w /app node:18 bash -c "npm version ${newVersion} --no-git-tag-version"'
                 }
             }
         }
