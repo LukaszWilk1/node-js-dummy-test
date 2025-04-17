@@ -113,17 +113,19 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')]) {
                     sh '''
-                        echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
-
-                        npm install
-                        npm publish
-
-                        rm ~/.npmrc
+                        docker run --rm \
+                            -v $(pwd):/app \
+                            -w /app \
+                            -e NPM_TOKEN=$NPM_TOKEN \
+                            node:18 bash -c '
+                                echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+                                npm install
+                                npm publish
+                            '
                     '''
                 }
             }
         }
-
     }
 
     post {
