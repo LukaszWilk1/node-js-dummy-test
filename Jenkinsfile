@@ -62,7 +62,7 @@ pipeline {
         stage('Run Deploy Container') {
             steps {
                 sh 'docker run -d --name deploy-container -p 3000:3000 $DEPLOY_CONTAINER_IMAGE'
-                sleep 30
+                sleep 15
             }
         }
 
