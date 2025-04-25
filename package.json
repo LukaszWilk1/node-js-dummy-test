@@ -17,8 +17,5 @@
   },
   "devDependencies": {
     "jest": "^28.0.2"
-  },
-  "files": [
-    "src"
-  ]
+  }
 }
