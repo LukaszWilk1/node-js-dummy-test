@@ -19,6 +19,6 @@
     "jest": "^28.0.2"
   },
   "files": [
-    "index.js"
+    "src"
   ]
 }
